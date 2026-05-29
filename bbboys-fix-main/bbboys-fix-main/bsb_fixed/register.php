@@ -14,14 +14,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
 
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $firstName      = isset($data['firstName'])      ? trim($data['firstName'])      : '';
-    $lastName       = isset($data['lastName'])       ? trim($data['lastName'])       : '';
     $username       = isset($data['username'])       ? trim($data['username'])       : '';
     $password       = isset($data['password'])       ? $data['password']             : '';
     $favoriteMember = isset($data['favoriteMember']) ? trim($data['favoriteMember']) : '';
 
     // Basic validation
-    if (empty($firstName) || empty($lastName) || empty($username) || empty($password)) {
+    if (empty($username) || empty($password)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'All required fields must be filled in.']);
         exit();
@@ -46,10 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
 
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $db->prepare(
-        'INSERT INTO fan_users (first_name, last_name, username, password, favorite_member)
-         VALUES (?, ?, ?, ?, ?)'
+        'INSERT INTO fan_users (username, password, favorite_member)
+         VALUES (?, ?, ?)'
     );
-    if ($stmt->execute([$firstName, $lastName, $username, $hashedPassword, $favoriteMember])) {
+    if ($stmt->execute([$username, $hashedPassword, $favoriteMember])) {
         http_response_code(201);
         echo json_encode(['success' => true, 'message' => 'Registration successful! You can now log in.']);
     } else {
@@ -167,23 +165,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
             <div id="alertBox" class="alert"></div>
 
             <form id="registerForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="firstName">First Name</label>
-                        <div class="input-wrapper">
-                            <input type="text" id="firstName" name="firstName" placeholder="First Name" required>
-                            <i class="fas fa-user input-icon"></i>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name</label>
-                        <div class="input-wrapper">
-                            <input type="text" id="lastName" name="lastName" placeholder="Last Name" required>
-                            <i class="fas fa-user input-icon"></i>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="form-group">
                     <label for="username">Username</label>
                     <div class="input-wrapper">
@@ -264,8 +245,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
             }
 
             const payload = {
-                firstName:      document.getElementById('firstName').value,
-                lastName:       document.getElementById('lastName').value,
                 username:       document.getElementById('username').value,
                 password:       password,
                 favoriteMember: document.getElementById('favoriteMember').value
