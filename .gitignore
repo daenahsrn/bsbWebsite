@@ -1,8 +1,1 @@
-```php
-<?php
-// This appears to be a PHP registration file that might contain sensitive information
-// such as database credentials, user data handling, or authentication logic.
-// Consider adding specific PHP-related ignores if this is part of a larger PHP project,
-// but this single file doesn't indicate a need for extensive .gitignore rules yet.
-?>
-```
+(empty)

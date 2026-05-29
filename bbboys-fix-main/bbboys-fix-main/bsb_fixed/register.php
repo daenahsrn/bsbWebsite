@@ -16,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
 
     $username       = isset($data['username'])       ? trim($data['username'])       : '';
     $password       = isset($data['password'])       ? $data['password']             : '';
-    $favoriteMember = isset($data['favoriteMember']) ? trim($data['favoriteMember']) : '';
 
     // Basic validation
     if (empty($username) || empty($password)) {
@@ -44,10 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
 
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $db->prepare(
-        'INSERT INTO fan_users (username, password, favorite_member)
-         VALUES (?, ?, ?)'
+        'INSERT INTO fan_users (username, password)
+         VALUES (?, ?)'
     );
-    if ($stmt->execute([$username, $hashedPassword, $favoriteMember])) {
+    if ($stmt->execute([$username, $hashedPassword])) {
         http_response_code(201);
         echo json_encode(['success' => true, 'message' => 'Registration successful! You can now log in.']);
     } else {
@@ -191,21 +190,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
                 </div>
 
                 <div class="form-group">
-                    <label for="favoriteMember">Favorite Member</label>
-                    <div class="input-wrapper">
-                        <select id="favoriteMember" name="favoriteMember" required>
-                            <option value="">Select your favorite</option>
-                            <option value="nick">Nick Carter</option>
-                            <option value="howie">Howie Dorough</option>
-                            <option value="aj">A.J. McLean</option>
-                            <option value="kevin">Kevin Richardson</option>
-                            <option value="brian">Brian Littrell</option>
-                        </select>
-                        <i class="fas fa-star input-icon"></i>
-                    </div>
-                </div>
-
-                <div class="form-group">
                     <label class="terms">
                         <input type="checkbox" id="termsCheck" required>
                         <span>I agree to the <a href="#">Terms &amp; Conditions</a> and <a href="#">Privacy Policy</a></span>
@@ -245,9 +229,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
             }
 
             const payload = {
-                username:       document.getElementById('username').value,
-                password:       password,
-                favoriteMember: document.getElementById('favoriteMember').value
+                username: document.getElementById('username').value,
+                password: password
             };
 
             submitBtn.disabled   = true;
