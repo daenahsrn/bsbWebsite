@@ -1,7 +1,7 @@
 <?php
 /**
  * FIX #9: Registration now has full backend integration.
- * Accepts POST JSON from the JS fetch, inserts into fan_users table,
+ * Accepts POST JSON from the JS fetch, inserts into admins table,
  * and returns a JSON response.
  */
 
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     $db = $database->getConnection();
 
     // Check for duplicate username
-    $check = $db->prepare('SELECT fan_id FROM fan_users WHERE username = ? LIMIT 1');
+    $check = $db->prepare('SELECT admin_id FROM admins WHERE username = ? LIMIT 1');
     $check->execute([$username]);
     if ($check->fetch()) {
         http_response_code(409);
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
 
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $db->prepare(
-        'INSERT INTO fan_users (username, password)
+        'INSERT INTO admins (username, password)
          VALUES (?, ?)'
     );
     if ($stmt->execute([$username, $hashedPassword])) {
