@@ -16,20 +16,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
 
     $firstName      = isset($data['firstName'])      ? trim($data['firstName'])      : '';
     $lastName       = isset($data['lastName'])       ? trim($data['lastName'])       : '';
-    $email          = isset($data['email'])          ? trim($data['email'])          : '';
     $username       = isset($data['username'])       ? trim($data['username'])       : '';
     $password       = isset($data['password'])       ? $data['password']             : '';
     $favoriteMember = isset($data['favoriteMember']) ? trim($data['favoriteMember']) : '';
 
     // Basic validation
-    if (empty($firstName) || empty($lastName) || empty($email) || empty($username) || empty($password)) {
+    if (empty($firstName) || empty($lastName) || empty($username) || empty($password)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'All required fields must be filled in.']);
-        exit();
-    }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Invalid email address.']);
         exit();
     }
     if (strlen($password) < 6) {
@@ -41,21 +35,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     $database = new Database();
     $db = $database->getConnection();
 
-    // Check for duplicate email or username
-    $check = $db->prepare('SELECT fan_id FROM fan_users WHERE email = ? OR username = ? LIMIT 1');
-    $check->execute([$email, $username]);
+    // Check for duplicate username
+    $check = $db->prepare('SELECT fan_id FROM fan_users WHERE username = ? LIMIT 1');
+    $check->execute([$username]);
     if ($check->fetch()) {
         http_response_code(409);
-        echo json_encode(['success' => false, 'message' => 'Email or username already in use.']);
+        echo json_encode(['success' => false, 'message' => 'Username already in use.']);
         exit();
     }
 
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $db->prepare(
-        'INSERT INTO fan_users (first_name, last_name, email, username, password, favorite_member)
-         VALUES (?, ?, ?, ?, ?, ?)'
+        'INSERT INTO fan_users (first_name, last_name, username, password, favorite_member)
+         VALUES (?, ?, ?, ?, ?)'
     );
-    if ($stmt->execute([$firstName, $lastName, $email, $username, $hashedPassword, $favoriteMember])) {
+    if ($stmt->execute([$firstName, $lastName, $username, $hashedPassword, $favoriteMember])) {
         http_response_code(201);
         echo json_encode(['success' => true, 'message' => 'Registration successful! You can now log in.']);
     } else {
@@ -191,14 +185,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <div class="input-wrapper">
-                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
-                        <i class="fas fa-envelope input-icon"></i>
-                    </div>
-                </div>
-
-                <div class="form-group">
                     <label for="username">Username</label>
                     <div class="input-wrapper">
                         <input type="text" id="username" name="username" placeholder="Choose a username" required>
@@ -280,7 +266,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
             const payload = {
                 firstName:      document.getElementById('firstName').value,
                 lastName:       document.getElementById('lastName').value,
-                email:          document.getElementById('email').value,
                 username:       document.getElementById('username').value,
                 password:       password,
                 favoriteMember: document.getElementById('favoriteMember').value
